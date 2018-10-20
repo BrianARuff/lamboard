@@ -21,7 +21,7 @@ router.get("/api/posts", (req, res) => {
       }
     })
     .catch(error =>
-      res.status(500).json({ message: "Internal server error", error })
+      res.status(500).json({ message: "Internal server error", error: {...error} })
     );
 });
 
@@ -42,7 +42,7 @@ router.get("/api/posts/:id", (req, res) => {
       }
     })
     .catch(error =>
-      res.status(500).json({ message: "Internal server error", error })
+      res.status(500).json({ message: "Internal server error", error: {...error} })
     );
 });
 
@@ -80,11 +80,11 @@ router.post("/api/posts", (req, res) => {
             res.status(200).json({ count, posts });
           })
           .catch(error =>
-            res.status(500).json({ message: "Internal server error", error })
+            res.status(500).json({ message: "Internal server error", error: {...error} })
           );
       })
       .catch(error =>
-        res.status(500).json({ message: "Internal server error", error })
+        res.status(500).json({ message: "Internal server error", error: {...error} })
       );
   }
 });
