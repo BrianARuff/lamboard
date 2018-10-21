@@ -21,7 +21,9 @@ router.get("/api/posts", (req, res) => {
       }
     })
     .catch(error =>
-      res.status(500).json({ message: "Internal server error", error: {...error} })
+      res
+        .status(500)
+        .json({ message: "Internal server error", error: { ...error } })
     );
 });
 
@@ -42,7 +44,9 @@ router.get("/api/posts/:id", (req, res) => {
       }
     })
     .catch(error =>
-      res.status(500).json({ message: "Internal server error", error: {...error} })
+      res
+        .status(500)
+        .json({ message: "Internal server error", error: { ...error } })
     );
 });
 
@@ -80,13 +84,35 @@ router.post("/api/posts", (req, res) => {
             res.status(200).json({ count, posts });
           })
           .catch(error =>
-            res.status(500).json({ message: "Internal server error", error: {...error} })
+            res
+              .status(500)
+              .json({ message: "Internal server error", error: { ...error } })
           );
       })
       .catch(error =>
-        res.status(500).json({ message: "Internal server error", error: {...error} })
+        res
+          .status(500)
+          .json({ message: "Internal server error", error: { ...error } })
       );
   }
+});
+
+router.put("/api/id", (req, res) => {
+  const { id } = req.params;
+  const { user_id, post_title, post_content, edited, timestamp } = req.body;
+  const post = { user_id, post_title, post_content, edited, timestamp };
+  postModel.updatePost(id, post).then(count => {
+    postModel
+      .getPosts()
+      .then(posts => {
+        res.status(200).json({ message: "Successfully updated post.", posts, count });
+      })
+      .catch(error =>
+        res
+          .status(500)
+          .json({ message: "Internal server error", error: { ...error } })
+      );
+  });
 });
 
 module.exports = router;
