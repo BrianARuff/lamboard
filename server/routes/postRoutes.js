@@ -4,11 +4,11 @@ const postModel = require("../models/postModel");
 
 const router = express.Router();
 
-router.get("/api/posts", (req, res) => {
+router.get("/", (req, res) => {
   postModel
     .getPosts()
     .then(posts => {
-      if (posts && posts.length > 1) {
+      if (posts && posts.length > 0) {
         res.status(200).json({
           message: "Successfully retrieved list of all posts.",
           posts
@@ -27,20 +27,17 @@ router.get("/api/posts", (req, res) => {
     );
 });
 
-router.get("/api/posts/:id", (req, res) => {
+router.get("/:id", (req, res) => {
   const { id } = req.params;
   return postModel
     .getPost(id)
     .then(post => {
-      if (post) {
+      if (!post) {
+        res.status(200).json({ message: "Post not found." });
+      } else {
         res
           .status(200)
-          .json({ message: `Successfully retried post at Id: ${id}`, post });
-      } else {
-        res.status(204).json({
-          message:
-            "This was post not found in the database. Please review your search query."
-        });
+          .json({ message: `Successfully retrieved post at Id: ${id}`, post });
       }
     })
     .catch(error =>
@@ -50,30 +47,15 @@ router.get("/api/posts/:id", (req, res) => {
     );
 });
 
-router.post("/api/posts", (req, res) => {
-  const { user_id, post_title, post_content, edited, timestamp } = req.body;
-  const post = { user_id, post_title, post_content, edited, timestamp };
+router.post("/", (req, res) => {
+  const { user_id, post_title, post_content } = req.body;
+  const post = { user_id, post_title, post_content };
   const addPostErrors = [];
   if (!user_id) addPostErrors.push({ message: "missing user id" });
   if (!post_title) addPostErrors.push({ message: "missing post title" });
   if (!post_content) addPostErrors.push({ message: "missing post content" });
-  if (
-    (edited < 0 && edited > 1) ||
-    edited === undefined ||
-    typeof edited !== "number"
-  )
-    addPostErrors.push({ message: "missing post edited value" });
-  if (!timestamp) addPostErrors.push({ message: "missing post timestamp." });
-  if (
-    !user_id ||
-    !post_title ||
-    !post_content ||
-    !timestamp ||
-    (edited < 0 && edited > 1) ||
-    edited === undefined ||
-    typeof edited !== "number"
-  ) {
-    res.status(401).json({ message: addPostErrors });
+  if (!user_id || !post_title || !post_content) {
+    res.status(401).json({ messages: addPostErrors });
   } else {
     postModel
       .addPost(post)
@@ -97,7 +79,7 @@ router.post("/api/posts", (req, res) => {
   }
 });
 
-router.put("/api/id", (req, res) => {
+router.put("/:id", (req, res) => {
   const { id } = req.params;
   const { user_id, post_title, post_content, edited, timestamp } = req.body;
   const post = { user_id, post_title, post_content, edited, timestamp };
@@ -105,7 +87,9 @@ router.put("/api/id", (req, res) => {
     postModel
       .getPosts()
       .then(posts => {
-        res.status(200).json({ message: "Successfully updated post.", posts, count });
+        res
+          .status(200)
+          .json({ message: "Successfully updated post.", posts, count });
       })
       .catch(error =>
         res
@@ -113,6 +97,24 @@ router.put("/api/id", (req, res) => {
           .json({ message: "Internal server error", error: { ...error } })
       );
   });
+});
+
+router.delete("/:id", (req, res) => {
+  const { id } = req.params;
+  postModel
+    .deletePost(id)
+    .then(count => {
+      postModel
+        .getPosts()
+        .then(posts =>
+          res
+            .status(200)
+            .json({ message: "Successfully deleted post", posts, count })
+        );
+    })
+    .catch(error =>
+      res.status(500).json({ message: "Internal server error.", ...error })
+    );
 });
 
 module.exports = router;

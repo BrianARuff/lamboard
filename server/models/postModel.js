@@ -8,28 +8,28 @@ module.exports = {
   deletePost
 };
 
-const getPosts = () => {
+function getPosts() {
   return db("posts");
 };
 
-const getPost = id => {
+function getPost(id) {
   return db("posts")
     .where({ id })
     .first();
 };
 
-const addPost = post => {
-  db("posts").insert(post);
+function addPost(post) {
+  return db("posts").insert(post);
 };
 
-const updatePost = (id, post) => {
+function updatePost(id, post) {
   return db("posts")
     .where({ id })
     .first()
     .update(post);
 };
 
-const deletePost = id => {
+function deletePost(id) {
   return db("posts")
     .where({ id })
     .first()
